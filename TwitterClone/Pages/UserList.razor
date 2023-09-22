@@ -1,0 +1,57 @@
+﻿@page "/"
+
+@inject ApiService ApiService
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    foreach (var user in users)
+    {
+        <div @onclick="() => SelectUser(user)">
+            <h3>@user.Name</h3>
+        </div>
+        if (selectedUser != null && selectedUser.Id == user.Id)
+        {
+            if (posts == null)
+            {
+                <p><em>Loading posts...</em></p>
+            }
+            else
+            {
+                foreach (var post in posts)
+                {
+                    <div>
+                        <h4>@post.Title</h4>
+                        <p>@post.Body</p>
+                    </div>
+                }
+            }
+        }
+    }
+}
+
+@code {
+    private IEnumerable<User> users;
+
+    private User selectedUser;
+
+    private IEnumerable<Post> posts;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await ApiService.GetUsersAsync();
+    }
+
+    private async void SelectUser(User user)
+    {
+        selectedUser = user;
+
+        posts = await ApiService.GetPostsAsync(user.Id);
+
+        StateHasChanged();
+    }
+}
